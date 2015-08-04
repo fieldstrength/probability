@@ -1,0 +1,6 @@
+package probability
+
+sourcedir = src
+
+modules = Probability
+	, Probability.Examples.Dice
