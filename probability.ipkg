@@ -3,4 +3,8 @@ package probability
 sourcedir = src
 
 modules = Probability
-	, Probability.Examples.Dice
+        , Probability.Core
+        , Probability.Display
+        , Probability.Monad
+        , Probability.Examples.Dice
+        , Probability.Examples.MontyHall

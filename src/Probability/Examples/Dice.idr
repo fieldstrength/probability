@@ -1,20 +1,17 @@
 module Probability.Examples.Dice
 
-import Probability
+import Probability.Core
+import Probability.Monad
 
 
 %default total
 
 
-die : ProbF Integer
+die : Prob Integer
 die = flat [1..6]
 
-addRoll : Transition Integer  -- Integer -> ProbF Integer
-addRoll n = (+ n) <$> die
+rollDie : Trans Integer
+rollDie n = (+ n) <$> die
 
-roll2 : ProbF Integer
-roll2 = gather $ die >>= addRoll
-
-roll3 : ProbF Integer
-roll3 = gather $ die >>= addRoll >>= addRoll
-
+roll : Nat -> Trans Integer
+roll n = perform n rollDie
