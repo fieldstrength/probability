@@ -1,5 +1,7 @@
 module Probability.Core
 
+import Probability.Utils
+
 
 %default total
 
@@ -33,20 +35,6 @@ objects (Pr l) = fst <$> l
 
 probs : Probability p a -> List p
 probs (Pr l) = snd <$> l
-
-
----- Utility functions ----
-
-normalize : List Float -> List Float
-normalize l = (/ (sum l)) <$> l
-
-zipWith' : (a -> b -> c) -> List a -> List b -> List c
-zipWith' f (x::xs) (y::ys) = f x y :: zipWith' f xs ys
-zipWith' f _       []      = []
-zipWith' f []      _       = []
-
-left : (a -> c) -> (a,b) -> (c,b)
-left f (x,y) = (f x, y)
 
 
 ---- Distributions ----
@@ -98,3 +86,16 @@ gatherer ((x,p) :: xs) = assert_total $  -- why is assert_total needed?
 ||| the monadic bind, but we can't due to the 'Eq a' constraint.
 gather : (Eq a, Eq p, Num p) => Probability p a -> Probability p a
 gather (Pr l) = Pr $ gatherer l
+
+||| Remove some element from a list
+except : Eq a => List a -> a -> List a
+except []      _ = []
+except (x::xs) y =
+  case (x==y) of
+       True  => except xs y
+       False => x :: except xs y
+
+||| Remove from some list the elements of another list
+removing : Eq a => List a -> List a -> List a
+removing l []      = l
+removing l (x::xs) = (l `except` x) `removing` xs

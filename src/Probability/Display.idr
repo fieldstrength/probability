@@ -1,6 +1,7 @@
 module Probability.Display
 
 import Probability.Core
+import Probability.Utils
 
 
 %default total

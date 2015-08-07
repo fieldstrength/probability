@@ -2,12 +2,17 @@ module Probability.Monad
 
 import Probability.Core
 
+
 %default total
 
 
-infixl 2 >=>
+infixr 6 >=>
 (>=>) : Monad m => (a -> m b) -> (b -> m c) -> a -> m c
 f >=> g = (>>= g) . f
+
+infixl 6 <=<
+(<=<) : Monad m => (b -> m c) -> (a -> m b) -> a -> m c
+(<=<) = flip (>=>)
 
 
 sequ : Monad m => List (a -> m a) -> a -> m a

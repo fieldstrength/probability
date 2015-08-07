@@ -6,5 +6,6 @@ modules = Probability
         , Probability.Core
         , Probability.Display
         , Probability.Monad
+        , Probability.Utils
         , Probability.Examples.Dice
         , Probability.Examples.MontyHall

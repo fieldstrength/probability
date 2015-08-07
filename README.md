@@ -8,7 +8,7 @@ It is heavily inspired by the [Probabilistic Functional Programming](https://web
 Much of the expressivity and power of this approach comes from the natural functorial, applicative and monadic structures on probability distributions. The implementation of these structures via the corresponding type classes is the core of the library, and is borrowed almost exactly from PFP.
 
 ### Examples
-##### Six-Sided Die
+#### Six-Sided Die
 
 For a simple example, we can model a standard die as a flat distribution over integers.
 
@@ -23,12 +23,12 @@ For a simple example, we can model a standard die as a flat distribution over in
 6| 16.66%  ██████████████████████████████
 ```
 
-To do something more interesting, we'd like to work not just with distributions over _objects_, but over _processes_, i.e. functions. We could turn our die into a distribution over the _adding functions_ `(+1)` to `(+6)`.
+To do something more interesting, we'd like to work not just with distributions over _objects_, but over _processes_, i.e. functions. So for example we can turn our die into a distribution over the _adding functions_ `(+1)` to `(+6)`.
 
 ```
 :let rollD = map (+) die
 ```
-Let's see what results from applying our probabilistic function `rollD` to our standard distribution over integers `die`. This is carried out by the `Applicative` instance and its operator `<*> : Prob (a -> b) -> Prob a -> Prob b`.
+Let's see what results from applying our probabilistic function `rollD` to our standard distribution over integers `die`. In other words, what is the outcome distribution on the roll of two dice? This is carried out by the `Applicative` instance and its operator `<*> : Prob (a -> b) -> Prob a -> Prob b`.
 
 ```
 *Probability> :x display $ rollD <*> die
@@ -82,4 +82,128 @@ The `Examples.Dice` module uses some monadic machinery to utilize this. Many var
 ```
 #### The Monty Hall Problem
 
-To be continued...
+The [Monty Hall problem](https://en.wikipedia.org/wiki/Monty_Hall_problem) is famous brain teaser which exposes the fact that our intuitions about probability can sometimes go badly astray.
+
+A contestant on a game show is presented with three doors, one of which has a prize behind it. They make an initial guess which door holds the prize. Next the host opens one of the other two doors, revealing that there is no prize behind it. Finally, the contestant can choose either to stay with their original choice or switch to the other unopened door. So what is the best strategy for the contestant?
+
+Many people erroneously believe that switching makes no difference. However the correct answer is that it's always better to switch, increasing the chance of success from 1/3 to 2/3. So let's use our package to analyze the problem.
+
+Start with a simple data type to represent the three doors.
+
+```idris
+data Door = One | Two | Three
+
+doors : List Door
+doors = [One,Two,Three]
+```
+
+Our graphing and other functionality of the package requires `Eq` and `Show` instances which are defined in the `Examples.MontyHall` module, but will not be shown here.
+
+We'll represent the state of the game by a `Vect` of `Door`s, encoding:
+
+  1. The door containing the prize
+  2. The contestant's first choice
+  3. The door opened by the host
+  4. The contestant's final choice
+
+We'll define a series of transition functions that step the game through its 4 stages. First a couple of type synonym helper functions.
+
+```idris
+Monty : Nat -> Type
+Monty n = Vect n Door
+
+Step : Nat -> Type
+Step n = Transition (Monty n) (Monty (S n))
+```
+
+So we'll be using dependent types to enforce one important property of our functions but this does not mean we need to write them out in detail repeatedly.
+
+The beginning of the game is modeled as a flat distribution over doors representing the prize location. They're placed in a vector to match our game state type outlined above.
+
+```idris
+placePrize : Prob (Monty 1)
+placePrize = map (:: Nil) $ flat doors
+```
+
+Now our first transition function. We're using a specialized operator `::~` to append elements to the _end_ of a vector, so that game histories can be read off more easily. As a reminder, the type `Step 1` Means `Transition (Monty 1) (Monty 2)` which in turn means `Vect 1 Door -> Prob (Vect 2 Door)`.
+
+```idris
+firstChoice : Step 1
+firstChoice v = map (v ::~) $ flat doors
+```
+
+So far, the game state we can build up is `placePrize >>= firstChoice`. At this point the distribution remains completely flat.
+
+The first non-trivial game logic comes in at this next step, which is also where our intuition can get thrown off. The host will only choose a door to open if it is neither the prize door nor the contestant's chosen door.
+
+```idris
+openOne : Step 2
+openOne v@[p,c] = map (v ::~) $ flat $ doors `removing` [p,c]
+```
+
+Now it may be instructive to consult the graph.
+
+```
+*Probability> :x display $ placePrize >>= firstChoice >>= openOne
+[Door #1, Door #1, Door #2]| 05.55%  ███████████████
+[Door #1, Door #1, Door #3]| 05.55%  ███████████████
+[Door #1, Door #2, Door #3]| 11.11%  ██████████████████████████████
+[Door #1, Door #3, Door #2]| 11.11%  ██████████████████████████████
+[Door #2, Door #1, Door #3]| 11.11%  ██████████████████████████████
+[Door #2, Door #2, Door #1]| 05.55%  ███████████████
+[Door #2, Door #2, Door #3]| 05.55%  ███████████████
+[Door #2, Door #3, Door #1]| 11.11%  ██████████████████████████████
+[Door #3, Door #1, Door #2]| 11.11%  ██████████████████████████████
+[Door #3, Door #2, Door #1]| 11.11%  ██████████████████████████████
+[Door #3, Door #3, Door #1]| 05.55%  ███████████████
+[Door #3, Door #3, Door #2]| 05.55%  ███████████████
+```
+
+The non-flat distribution results from the fact that, when the contestant has successfully chosen the prize door, the host can choose from two different doors to open, whereas otherwise he is forced to open a particular door. So the short bars with 5.55% probability correspond to the winning game histories, adding up to a total chance of 1/3. However if the player can utilize their knowledge of this distribution they can up their odds to 2/3.
+
+The switch and stay strategies can be described as follows.
+
+```idris
+stay : Step 3
+stay v@[p,c,o] = certainly $ v ::~ c
+
+switch : Step 3
+switch v@[p,c,o] = map (v ::~) $ flat $ doors `removing` [c,o]
+```
+
+Putting everything together, the two distributions corresponding to the two game strategies are:
+
+```idris
+stayGame : Prob (Monty 4)
+stayGame = placePrize >>= firstChoice >>= openOne >>= stay
+
+switchGame : Prob (Monty 4)
+switchGame = placePrize >>= firstChoice >>= openOne >>= switch
+```
+
+By the way, we've defined a couple of additional types that wrap our game vectors to assist in reading our graphs. `GameScore` introduces a modified `Show` instance to annotate the win/loss status (and uses the first door choice if the final has yet to be made), while `GameOutcome` also modifies the `Eq` instance so that we can collapse all the histories with the same outcome. In other words, it performs the sums to verify that the overall outcome probabilities are what they are.
+
+
+```
+*Probability> :x display $ Score <$> switchGame
+ LOSE [Door #1, Door #1, Door #2, Door #3]| 05.55%  ███████████████
+ LOSE [Door #1, Door #1, Door #3, Door #2]| 05.55%  ███████████████
+ WIN  [Door #1, Door #2, Door #3, Door #1]| 11.11%  ██████████████████████████████
+ WIN  [Door #1, Door #3, Door #2, Door #1]| 11.11%  ██████████████████████████████
+ WIN  [Door #2, Door #1, Door #3, Door #2]| 11.11%  ██████████████████████████████
+ LOSE [Door #2, Door #2, Door #1, Door #3]| 05.55%  ███████████████
+ LOSE [Door #2, Door #2, Door #3, Door #1]| 05.55%  ███████████████
+ WIN  [Door #2, Door #3, Door #1, Door #2]| 11.11%  ██████████████████████████████
+ WIN  [Door #3, Door #1, Door #2, Door #3]| 11.11%  ██████████████████████████████
+ WIN  [Door #3, Door #2, Door #1, Door #3]| 11.11%  ██████████████████████████████
+ LOSE [Door #3, Door #3, Door #1, Door #2]| 05.55%  ███████████████
+ LOSE [Door #3, Door #3, Door #2, Door #1]| 05.55%  ███████████████
+```
+
+```
+*Probability> :x display $ Outcome <$> switchGame
+ LOSE | 33.33%  ███████████████
+ WIN  | 66.66%  ██████████████████████████████
+```
+
+These hopefully give a sense of some of the general techniques that can be used in conjunction with this graphing functionality.

@@ -1,7 +1,7 @@
 module Probability.Examples.MontyHall
 
 import Probability.Core
-import Probability.Display
+import Probability.Utils
 
 import Data.Vect
 
@@ -36,33 +36,33 @@ doors = [One,Two,Three]
 Monty : (n : Nat) -> Type
 Monty n = Vect n Door
 
-infixl 5 ::~
+||| Check if the contestant is currently winning.
+||| Compare the prize door to either their final choice,
+||| or their initial choice if the final choice isn't made yet.
+score : Monty (S (S k)) -> Bool
+score {k} v = case k of
+  S (S n) => index 3 v == index 0 v
+  _       => index 1 v == index 0 v
 
-||| Append at the end of a vector
-(::~) : Vect n a -> a -> Vect (S n) a
-(::~) {n} v x = rewrite plusCommutative 1 n in v ++ [x]
 
+data GameScore = Score (Vect (S (S n)) Door)
 
-win : Monty 4 -> Bool
-win [p,c,o,f] = f == p
+instance Eq GameScore where
+  (Score v) == (Score w) = vecEq v w
 
-data GameHistory = History (Monty 4)
-
-instance Eq GameHistory where
-  (History v) == (History w) = v == w
-
-instance Show GameHistory where
-  show (History v) = let status = if win v then " WIN  " else " LOSE "
+instance Show GameScore where
+  show (Score v) = let status = if score v then " WIN  " else " LOSE "
     in  status ++ show v
 
 
-data Outcome = Out (Monty 4)
 
-instance Eq Outcome where
-  (Out v) == (Out w) = win v == win w
+data GameOutcome = Outcome (Monty (S (S n)))
 
-instance Show Outcome where
-  show (Out v) = if win v then " WIN  " else " LOSE "
+instance Eq GameOutcome where
+  (Outcome v) == (Outcome w) = score v == score w
+
+instance Show GameOutcome where
+  show (Outcome v) = if score v then " WIN  " else " LOSE "
 
 
 {- We'll be building up a Vect 4 Door encoding:
@@ -74,19 +74,6 @@ instance Show Outcome where
 Step : Nat -> Type
 Step n = Transition (Monty n) (Monty (S n))
 
-||| Remove some element from a list
-except : Eq a => List a -> a -> List a
-except []      _ = []
-except (x::xs) y =
-  case (x==y) of
-       True  => except xs y
-       False => x :: except xs y
-
-||| Remove elements of some list from another list
-removing : Eq a => List a -> List a -> List a
-removing l []      = l
-removing l (x::xs) = (l `except` x) `removing` xs
-
 
 placePrize : Prob (Monty 1)
 placePrize = map (:: Nil) $ flat doors
@@ -94,8 +81,11 @@ placePrize = map (:: Nil) $ flat doors
 firstChoice : Step 1
 firstChoice v = map (v ::~) $ flat doors
 
+chooseOne : Step 1
+chooseOne v = map (v ::~) $ certainly One
+
 openOne : Step 2
-openOne v@[p,c] = map (v ::~) $ flat $ doors `removing` [c,p]
+openOne v@[p,c] = map (v ::~) $ flat $ doors `removing` [p,c]
 
 stay : Step 3
 stay v@[p,c,o] = certainly $ v ::~ c
@@ -111,15 +101,15 @@ switchGame : Prob (Monty 4)
 switchGame = placePrize >>= firstChoice >>= openOne >>= switch
 
 
-stayOutcome : Prob Outcome
-stayOutcome = Out <$> stayGame
+stayOutcome : Prob GameOutcome
+stayOutcome = Outcome <$> stayGame
 
-stayHistory : Prob GameHistory
-stayHistory = History <$> stayGame
+stayHistory : Prob GameScore
+stayHistory = Score <$> stayGame
 
 
-switchOutcome : Prob Outcome
-switchOutcome = Out <$> switchGame
+switchOutcome : Prob GameOutcome
+switchOutcome = Outcome <$> switchGame
 
-switchHistory : Prob GameHistory
-switchHistory = History <$> switchGame
+switchHistory : Prob GameScore
+switchHistory = Score <$> switchGame
