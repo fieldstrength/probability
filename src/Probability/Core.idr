@@ -63,16 +63,7 @@ instance Num p => Monad (Probability p) where
   d >>= f = Pr [ (y, q*w) | (x,w) <- runProb d, (y,q) <- runProb (f x) ]
 
 
----- Other Functions ----
-
-||| Split a list into two lists according to whether a
-||| predicate function returns true
-splitBy : (a -> Bool) -> List a -> (List a, List a)
-splitBy f l = splitter f (reverse l) ([],[])
-   where splitter : (a -> Bool) -> List a -> (List a, List a) -> (List a, List a)
-         splitter f []      (xs,ys) = (xs,ys)
-         splitter f (z::zs) (xs,ys) = if f z then splitter f zs (z :: xs, ys)
-                                             else splitter f zs (xs, z :: ys)
+---- Consolidation ----
 
 gatherer : (Eq a, Eq p, Num p) => List (a,p) -> List (a,p)
 gatherer [] = []
@@ -86,6 +77,9 @@ gatherer ((x,p) :: xs) = assert_total $  -- why is assert_total needed?
 ||| the monadic bind, but we can't due to the 'Eq a' constraint.
 gather : (Eq a, Eq p, Num p) => Probability p a -> Probability p a
 gather (Pr l) = Pr $ gatherer l
+
+
+---- Other Functions ----
 
 ||| Remove some element from a list
 except : Eq a => List a -> a -> List a

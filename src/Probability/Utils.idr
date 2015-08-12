@@ -29,3 +29,12 @@ zipWith' f []      _       = []
 
 left : (a -> c) -> (a,b) -> (c,b)
 left f (x,y) = (f x, y)
+
+||| Split a list into two lists according to whether a
+||| predicate function returns true
+splitBy : (a -> Bool) -> List a -> (List a, List a)
+splitBy f l = splitter f (reverse l) ([],[])
+   where splitter : (a -> Bool) -> List a -> (List a, List a) -> (List a, List a)
+         splitter f []      (xs,ys) = (xs,ys)
+         splitter f (z::zs) (xs,ys) = if f z then splitter f zs (z :: xs, ys)
+                                             else splitter f zs (xs, z :: ys)

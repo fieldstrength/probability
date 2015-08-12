@@ -9,3 +9,4 @@ modules = Probability
         , Probability.Utils
         , Probability.Examples.Dice
         , Probability.Examples.MontyHall
+        , Probability.Examples.RandomWalk

@@ -6,3 +6,4 @@ import public Probability.Monad
 import public Probability.Utils
 import public Probability.Examples.Dice
 import public Probability.Examples.MontyHall
+import public Probability.Examples.RandomWalk

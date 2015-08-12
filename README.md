@@ -7,6 +7,8 @@ It is heavily inspired by the [Probabilistic Functional Programming](https://web
 
 Much of the expressivity and power of this approach comes from the natural functorial, applicative and monadic structures on probability distributions. The implementation of these structures via the corresponding type classes is the core of the library, and is borrowed almost exactly from PFP.
 
+The package needs idris 0.9.19 or the current Github version.
+
 ### Examples
 #### Six-Sided Die
 
@@ -50,14 +52,30 @@ Note that our original distribution `die` is the same thing as `rollD <*> certai
 In many circumstances `Applicative` won't be general enough, and we'll need the Monad instance, i.e. an operator that depends on `a -> Prob b` instead of `Prob (a -> b)`. As a simple example we could do something like
 
 ```
-*Probability> :let rollAgain = \n => map (+n) die
-*Probability> die >>= rollAgain >>= rollAgain
+*Probability> :let rollDie = \n => map (+n) die
+*Probability> die >>= rollDie >>= rollDie
 ```
 
-The `Examples.Dice` module uses some monadic machinery to utilize this. Many variations on the basic idea are possible.
+This is defined in the `Examples.Dice` module, but we want to emphasize that it's possible to do all of this from the REPL.
+
+Clearly we'll want to abstract this pattern, and this is easily accomplished with some monadic machinery defined in the `Monad` module. For example we can bind together an arbitrary number of monadic operations using the `perform` function, allowing us to define:
+
+```idris
+rollDice : Nat -> Trans Integer
+rollDice n = perform n rollDie
+```
+
+Finally, since we'll usually want to end up with a distribution over integers again, starting from zero, we define:
+
+```idris
+roll : Nat -> Prob Integer
+roll n = pure 0 >>= rollDice n
+```
+
+Many variations on these basic approaches are possible.
 
 ```
-*Probability> :x display $ pure 0 >>= roll 4
+*Probability> :x display $ roll 4
  4| 00.07%  ▏
  5| 00.30%  ▊
  6| 00.77%  ██
@@ -82,7 +100,7 @@ The `Examples.Dice` module uses some monadic machinery to utilize this. Many var
 ```
 #### The Monty Hall Problem
 
-The [Monty Hall problem](https://en.wikipedia.org/wiki/Monty_Hall_problem) is famous brain teaser which exposes the fact that our intuitions about probability can sometimes go badly astray.
+The [Monty Hall problem](https://en.wikipedia.org/wiki/Monty_Hall_problem) is famous brain teaser which exposes the fact that our intuitions about probability can go badly astray.
 
 A contestant on a game show is presented with three doors, one of which has a prize behind it. They make an initial guess which door holds the prize. Next the host opens one of the other two doors, revealing that there is no prize behind it. Finally, the contestant can choose either to stay with their original choice or switch to the other unopened door. So what is the best strategy for the contestant?
 
@@ -116,9 +134,9 @@ Step : Nat -> Type
 Step n = Transition (Monty n) (Monty (S n))
 ```
 
-So we'll be using dependent types to enforce one important property of our functions but this does not mean we need to write them out in detail repeatedly.
+So we'll be using dependent types to enforce an important property of our functions, but this does not mean we need to write them out in detail repeatedly.
 
-The beginning of the game is modeled as a flat distribution over doors representing the prize location. They're placed in a vector to match our game state type outlined above.
+The beginning of the game is modeled as a flat distribution over doors representing the prize location. They're placed in a vector to match our game state type defined above.
 
 ```idris
 placePrize : Prob (Monty 1)
@@ -206,4 +224,4 @@ By the way, we've defined a couple of additional types that wrap our game vector
  WIN  | 66.66%  ██████████████████████████████
 ```
 
-These hopefully give a sense of some of the general techniques that can be used in conjunction with this graphing functionality.
+These hopefully give a sense of some of the general techniques that can be used.
