@@ -1,4 +1,5 @@
-# Probability
+# Probability [![Build Status](https://travis-ci.org/BlackBrane/probability.svg?branch=master)](https://travis-ci.org/BlackBrane/probability)
+
 _Probabilistic computation in Idris._
 
 The __probability__ package provides facilities for manipulation and visualization of probability distributions.
