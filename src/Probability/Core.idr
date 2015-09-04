@@ -47,7 +47,7 @@ flat l = let s = (1 / (cast $ length l))
   in Pr $ (\x => (x,s)) <$> l
 
 shape : List a -> List Float -> Prob a
-shape xs ps = Pr $ zipWith' MkPair xs (normalize ps)
+shape xs ps = Pr $ zipWith MkPair xs (normalize ps)
 
 
 ---- Instances ----

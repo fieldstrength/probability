@@ -22,11 +22,6 @@ vecEq _       _       = False
 normalize : List Float -> List Float
 normalize l = (/ (sum l)) <$> l
 
-zipWith' : (a -> b -> c) -> List a -> List b -> List c
-zipWith' f (x::xs) (y::ys) = f x y :: zipWith' f xs ys
-zipWith' f _       []      = []
-zipWith' f []      _       = []
-
 left : (a -> c) -> (a,b) -> (c,b)
 left f (x,y) = (f x, y)
 

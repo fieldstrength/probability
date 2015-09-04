@@ -6,7 +6,7 @@ import Probability.Utils
 
 %default total
 
-
+||| Controls the width of terminal graph displays
 width : Float
 width = 30
 
@@ -21,11 +21,48 @@ intPart = cast . cast {to=Integer}
 fracPart : Float -> Float
 fracPart x = x - intPart x
 
-
 ||| Raise a float to an arbitrary integral power
 fpow : Float -> Integer -> Float
 fpow f p = if p >= 0 then pow f (cast p)
                      else 1 / (pow f $ cast $ abs p)
+
+
+---- Display Bars ----
+
+tipChars : List String
+tipChars = ["▉",
+            "▊",
+            "▋",
+            "▌",
+            "▍",
+            "▎",
+            "▏"]
+
+tipVals : List Float
+tipVals = (+ 0.0625) . (/8) . cast <$> reverse [1..7]
+     -- = [15/16, 13/16, 11/16, 9/16, 7/16, 5/16, 3/16]
+
+
+tips : List (Float,String)
+tips = zipWith MkPair tipVals tipChars
+
+selectTip : Float -> String
+selectTip x = let l = filter (\p => fst p < x) tips
+  in case l of
+     [] => ""
+     ((f,s)::ss) => s
+
+
+bar : Float -> String
+bar f = pack (replicate (castFN f) '█') ++ selectTip (fracPart f)
+
+bars : List Float -> List String
+bars l = let mx = foldr max 0 l
+  in map bar $ map (* width/mx) l
+
+labels : List String -> List String
+labels l = let mx = foldr max 0 (length <$> l)
+  in (\s => (pack $ replicate (mx `minus` length s) ' ') ++ s ++ "|") <$> l
 
 
 %default partial
@@ -71,58 +108,15 @@ showPercent x = let y  = 100 * x
   in " " ++ s1 ++ "." ++ s2 ++ "%  "
 
 
-%default total
-
-
----- Display Bars ----
-
-tipChars : List String
-tipChars = ["▉",
-            "▊",
-            "▋",
-            "▌",
-            "▍",
-            "▎",
-            "▏"]
-
-tipVals : List Float
-tipVals = (+ 0.0625) . (/8) . cast <$> reverse [1..7]
-     -- = [15/16, 13/16, 11/16, 9/16, 7/16, 5/16, 3/16]
-
-
-tips : List (Float,String)
-tips = zipWith' MkPair tipVals tipChars
-
-selectTip : Float -> String
-selectTip x = let l = filter (\p => fst p < x) tips
-  in case l of
-     [] => ""
-     ((f,s)::ss) => s
-
-
-bar : Float -> String
-bar f = pack (replicate (castFN f) '█') ++ selectTip (fracPart f)
-
-bars : List Float -> List String
-bars l = let mx = foldr max 0 l
-  in map bar $ map (* width/mx) l
-
-
-labels : List String -> List String
-labels l = let mx = foldr max 0 (length <$> l)
-  in (\s => (pack $ replicate (mx - length s) ' ') ++ s ++ "|") <$> l
-
-
-%default partial
-
+---- Display Graph ----
 
 disp : (Show a, Eq a) => Prob a -> List String
 disp p = let q  = gather p
              ls = labels . map show $ objects q
              bs = bars $ probs q
              ps = showPercent <$> probs q
-             ss = zipWith' (++) ls ps
-  in zipWith' (++) ss bs
+             ss = zipWith (++) ls ps
+  in zipWith (++) ss bs
 
 display : (Show a, Eq a) => Prob a -> IO ()
 display p = putStrLn . unlines $ disp p
