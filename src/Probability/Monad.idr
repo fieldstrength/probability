@@ -1,7 +1,5 @@
 module Probability.Monad
 
-import Probability.Core
-
 
 %default total
 

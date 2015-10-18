@@ -17,7 +17,7 @@ data Probability p a = Pr (List (a,p))
 ---- Types ----
 
 Prob : Type -> Type
-Prob t = Probability Float t
+Prob = Probability Float
 
 Transition : Type -> Type -> Type
 Transition a b = a -> Prob b

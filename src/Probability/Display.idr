@@ -6,7 +6,7 @@ import Probability.Utils
 
 %default total
 
-||| Controls the width of terminal graph displays
+||| Sets the width of terminal graph displays
 width : Float
 width = 30
 

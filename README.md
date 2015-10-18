@@ -8,7 +8,7 @@ It is heavily inspired by the [Probabilistic Functional Programming](https://web
 
 Much of the expressivity and power of this approach comes from the natural functorial, applicative and monadic structures on probability distributions. The implementation of these structures via the corresponding type classes is the core of the library, and is borrowed almost exactly from PFP.
 
-The package needs idris 0.9.19 or the current Github version.
+Needs Idris 0.9.19 or the current Github version.
 
 ### Examples
 #### Six-Sided Die
@@ -116,7 +116,7 @@ doors : List Door
 doors = [One,Two,Three]
 ```
 
-Our graphing and other functionality of the package requires `Eq` and `Show` instances which are defined in the `Examples.MontyHall` module, but will not be shown here.
+Our graphing and other functionality of the package require `Eq` and `Show` instances which are defined in the `Examples.MontyHall` module, but will not be shown here.
 
 We'll represent the state of the game by a `Vect` of `Door`s, encoding:
 
@@ -144,7 +144,7 @@ placePrize : Prob (Monty 1)
 placePrize = map (:: Nil) $ flat doors
 ```
 
-Now our first transition function. We're using a specialized operator `::~` to append elements to the _end_ of a vector, so that game histories can be read off more easily. As a reminder, the type `Step 1` Means `Transition (Monty 1) (Monty 2)` which in turn means `Vect 1 Door -> Prob (Vect 2 Door)`.
+Now our first transition function. We're using a specialized operator `::~` to append elements to the _end_ of a vector, so that game histories can be read off more easily. As a reminder, the type `Step 1` means `Transition (Monty 1) (Monty 2)` which in turn means `Vect 1 Door -> Prob (Vect 2 Door)`.
 
 ```idris
 firstChoice : Step 1
