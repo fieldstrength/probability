@@ -8,7 +8,7 @@ It is heavily inspired by the [Probabilistic Functional Programming](https://web
 
 Much of the expressivity and power of this approach comes from the natural functorial, applicative and monadic structures on probability distributions. The implementation of these structures via the corresponding type classes is the core of the library, and is borrowed almost exactly from PFP.
 
-Needs Idris 0.9.19 or the current Github version.
+Needs Idris 1.0 or the current Github version.
 
 ### Examples
 #### Six-Sided Die
