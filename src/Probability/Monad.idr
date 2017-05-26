@@ -3,6 +3,7 @@ module Probability.Monad
 
 %default total
 
+%access export
 
 infixr 6 >=>
 (>=>) : Monad m => (a -> m b) -> (b -> m c) -> a -> m c

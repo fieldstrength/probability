@@ -11,13 +11,13 @@ import Data.Vect
 
 data Door = One | Two | Three
 
-instance Eq Door where
+Eq Door where
   One   == One   = True
   Two   == Two   = True
   Three == Three = True
   _     == _     = False
 
-instance Show Door where
+Show Door where
   show One   = "Door #1"
   show Two   = "Door #2"
   show Three = "Door #3"
@@ -47,10 +47,10 @@ score {k} v = case k of
 
 data GameScore = Score (Vect (S (S n)) Door)
 
-instance Eq GameScore where
+Eq GameScore where
   (Score v) == (Score w) = vecEq v w
 
-instance Show GameScore where
+Show GameScore where
   show (Score v) = let status = if score v then " WIN  " else " LOSE "
     in  status ++ show v
 
@@ -58,10 +58,10 @@ instance Show GameScore where
 
 data GameOutcome = Outcome (Monty (S (S n)))
 
-instance Eq GameOutcome where
+Eq GameOutcome where
   (Outcome v) == (Outcome w) = score v == score w
 
-instance Show GameOutcome where
+Show GameOutcome where
   show (Outcome v) = if score v then " WIN  " else " LOSE "
 
 
