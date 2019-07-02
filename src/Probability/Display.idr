@@ -23,8 +23,8 @@ fracPart x = x - intPart x
 
 ||| Raise a double to an arbitrary integral power
 fpow : Double -> Integer -> Double
-fpow f p = if p >= 0 then pow f (cast p)
-                     else 1 / (pow f $ cast $ abs p)
+fpow f p = if p >= 0 then Prelude.pow f (cast p)
+                     else 1 / (Prelude.pow f $ cast $ abs p)
 
 
 ---- Display Bars ----
