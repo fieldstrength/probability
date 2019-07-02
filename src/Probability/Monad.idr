@@ -15,7 +15,7 @@ infixl 6 <=<
 
 
 sequ : Monad m => List (a -> m a) -> a -> m a
-sequ = foldl (>=>) return
+sequ = foldl (>=>) pure
 
 
 perform : Monad m => Nat -> (a -> m a) -> a -> m a
