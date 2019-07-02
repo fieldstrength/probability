@@ -3,6 +3,7 @@ module Probability.Monad
 
 %default total
 
+%access export
 
 infixr 6 >=>
 (>=>) : Monad m => (a -> m b) -> (b -> m c) -> a -> m c
@@ -14,7 +15,7 @@ infixl 6 <=<
 
 
 sequ : Monad m => List (a -> m a) -> a -> m a
-sequ = foldl (>=>) return
+sequ = foldl (>=>) pure
 
 
 perform : Monad m => Nat -> (a -> m a) -> a -> m a

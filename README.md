@@ -1,4 +1,4 @@
-# Probability [![Build Status](https://travis-ci.org/BlackBrane/probability.svg?branch=master)](https://travis-ci.org/BlackBrane/probability)
+# Probability [![Build Status](https://travis-ci.org/fieldstrength/probability.svg?branch=master)](https://travis-ci.org/fieldstrength/probability)
 
 _Probabilistic computation in Idris._
 
