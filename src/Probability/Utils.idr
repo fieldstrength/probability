@@ -19,7 +19,7 @@ vecEq []      []      = True
 vecEq _       _       = False
 
 
-normalize : List Float -> List Float
+normalize : List Double -> List Double
 normalize l = (/ (sum l)) <$> l
 
 left : (a -> c) -> (a,b) -> (c,b)

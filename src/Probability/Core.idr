@@ -17,7 +17,7 @@ data Probability p a = Pr (List (a,p))
 ---- Types ----
 
 Prob : Type -> Type
-Prob = Probability Float
+Prob = Probability Double
 
 Transition : Type -> Type -> Type
 Transition a b = a -> Prob b
@@ -46,7 +46,7 @@ flat : List a -> Prob a
 flat l = let s = (1 / (cast $ length l))
   in Pr $ (\x => (x,s)) <$> l
 
-shape : List a -> List Float -> Prob a
+shape : List a -> List Double -> Prob a
 shape xs ps = Pr $ zipWith MkPair xs (normalize ps)
 
 
