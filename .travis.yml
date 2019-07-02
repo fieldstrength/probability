@@ -1,7 +1,7 @@
 language: haskell
 
 install:
-  - travis_wait cabal install idris
+  - travis_wait 60 cabal install idris
 
 script:
   - idris --install probability.ipkg
