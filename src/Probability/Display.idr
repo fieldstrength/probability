@@ -21,10 +21,10 @@ intPart = cast . cast {to=Integer}
 fracPart : Double -> Double
 fracPart x = x - intPart x
 
-fpow f p = if p >= 0 then pow f (cast p)
-                     else 1 / (pow f $ cast $ abs p)
 ||| Raise a double to an arbitrary integral power
 fpow : Double -> Integer -> Double
+fpow f p = if p >= 0 then pow f (cast p)
+                     else 1 / (pow f $ cast $ abs p)
 
 
 ---- Display Bars ----
