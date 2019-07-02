@@ -5,6 +5,7 @@ import Data.Vect
 
 %default total
 
+%access export
 
 infixl 5 ::~
 

@@ -5,23 +5,24 @@ import Probability.Utils
 
 %default total
 
+%access export
+
 
 ||| Representation of a probability distribution
-abstract
 data Probability p a = Pr (List (a,p))
-
-
-%access public
 
 
 ---- Types ----
 
+public export
 Prob : Type -> Type
 Prob = Probability Double
 
+public export
 Transition : Type -> Type -> Type
 Transition a b = a -> Prob b
 
+public export
 Trans : Type -> Type
 Trans t = Transition t t
 
@@ -52,14 +53,14 @@ shape xs ps = Pr $ zipWith MkPair xs (normalize ps)
 
 ---- Instances ----
 
-instance Functor (Probability p) where
+Functor (Probability p) where
   map f (Pr l) = Pr $ left f <$> l
 
-instance Num p => Applicative (Probability p) where
+Num p => Applicative (Probability p) where
   pure     = certainly
   fm <*> m = Pr [ (f x, q*w) | (f,w) <- runProb fm, (x,q) <- runProb m ]
 
-instance Num p => Monad (Probability p) where
+Num p => Monad (Probability p) where
   d >>= f = Pr [ (y, q*w) | (x,w) <- runProb d, (y,q) <- runProb (f x) ]
 
 
